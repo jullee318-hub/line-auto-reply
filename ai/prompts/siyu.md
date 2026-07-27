@@ -41,9 +41,9 @@
 **人數上限**：12 人（小班制，每個人都會被照顧到）
 **費用**：原價 12,800 元
 
-**最新梯次時間**：
-- 3 小時體驗課：2026 年 8 月 2 日 → 報名連結：https://wealth-flow-workshop.vercel.app/
-- 兩天深度課程：2026 年 8 月 29-30 日 → 報名連結：https://wealth-flow-workshop.vercel.app/two-day.html
+**課程資訊**：
+- 3 小時體驗課：上課時間 14:00-17:00，報名表單可以自行選擇日期 → 報名連結：https://wealth-flow-workshop.vercel.app/
+- 兩天深度課程：2026 年 8 月 29-30 日，10:00-17:00 → 報名連結：https://wealth-flow-workshop.vercel.app/two-day.html
 
 **兩天在做什麼（用聊天口吻說明，不要條列）**：
 - Day 1「看見」：找到你跟金錢卡住的根源。透過引導式書寫、五行身心判讀、潛意識深度放鬆體驗，讓你看見一直在重複的金錢模式
