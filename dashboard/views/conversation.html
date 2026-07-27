@@ -270,22 +270,38 @@ async function loadConversation() {
 }
 
 async function approveDraft(draftId) {
-  await fetch(`/api/drafts/${draftId}/approve`, { method: 'POST' });
+  try {
+    const res = await fetch(`/api/drafts/${draftId}/approve`, { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) { alert('送出失敗：' + (data.error || '未知錯誤')); return; }
+    alert('已送出回覆給觀眾');
+  } catch (e) { alert('操作失敗：' + e.message); }
   loadConversation();
 }
 
 async function editDraft(draftId) {
   const content = document.getElementById('draftContent').value;
-  await fetch(`/api/drafts/${draftId}/edit`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content }),
-  });
+  if (!content.trim()) { alert('請輸入修改後的內容'); return; }
+  try {
+    const res = await fetch(`/api/drafts/${draftId}/edit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    const data = await res.json();
+    if (!res.ok) { alert('送出失敗：' + (data.error || '未知錯誤')); return; }
+    alert('已送出修改後的回覆');
+  } catch (e) { alert('操作失敗：' + e.message); }
   loadConversation();
 }
 
 async function rejectDraft(draftId) {
-  await fetch(`/api/drafts/${draftId}/reject`, { method: 'POST' });
+  if (!confirm('確定要拒絕這則草稿嗎？')) return;
+  try {
+    const res = await fetch(`/api/drafts/${draftId}/reject`, { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) { alert('操作失敗：' + (data.error || '未知錯誤')); return; }
+  } catch (e) { alert('操作失敗：' + e.message); }
   loadConversation();
 }
 
@@ -298,12 +314,16 @@ async function sendReply() {
   const input = document.getElementById('replyInput');
   const content = input.value.trim();
   if (!content) return;
-  input.value = '';
-  await fetch(`/api/conversations/${contactId}/send`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content }),
-  });
+  try {
+    const res = await fetch(`/api/conversations/${contactId}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    const data = await res.json();
+    if (!res.ok) { alert('送出失敗：' + (data.error || '未知錯誤')); return; }
+    input.value = '';
+  } catch (e) { alert('送出失敗：' + e.message); return; }
   loadConversation();
 }
 
