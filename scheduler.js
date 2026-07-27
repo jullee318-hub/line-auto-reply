@@ -5,7 +5,8 @@ async function processPendingBroadcasts() {
   const pending = db.getPendingBroadcasts();
   for (const broadcast of pending) {
     console.log('[排程] 開始發送排程訊息 #' + broadcast.id);
-    const contacts = db.getContactsByTarget(broadcast.target, broadcast.target_stage);
+    const contactIds = broadcast.contact_ids ? JSON.parse(broadcast.contact_ids) : null;
+    const contacts = db.getContactsByTarget(broadcast.target, broadcast.target_stage, contactIds);
     let sentCount = 0;
     let failCount = 0;
 

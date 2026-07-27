@@ -164,17 +164,21 @@ function setupRoutes(app) {
 
   app.post('/api/broadcasts', requireAuth, (req, res) => {
     try {
-      const { content, target, target_stage, scheduled_at } = req.body;
+      const { content, target, target_stage, scheduled_at, contact_ids } = req.body;
       if (!content || !content.trim()) return res.status(400).json({ error: '請輸入訊息內容' });
       if (!scheduled_at) return res.status(400).json({ error: '請選擇發送時間' });
+      if (target === 'pick' && (!contact_ids || contact_ids.length === 0)) {
+        return res.status(400).json({ error: '請至少勾選一位聯絡人' });
+      }
 
-      const contacts = db.getContactsByTarget(target || 'all', target_stage);
+      const contacts = db.getContactsByTarget(target || 'all', target_stage, contact_ids);
       if (contacts.length === 0) return res.status(400).json({ error: '沒有符合條件的聯絡人' });
 
       const id = db.createBroadcast(
         content.trim(),
         target || 'all',
         target_stage || null,
+        contact_ids || null,
         scheduled_at,
         req.session.operator.username
       );

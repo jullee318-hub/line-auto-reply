@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS broadcasts (
   content TEXT NOT NULL,
   target TEXT NOT NULL DEFAULT 'all',
   target_stage TEXT,
+  contact_ids TEXT,
   scheduled_at TEXT NOT NULL,
   status TEXT DEFAULT 'pending',
   sent_count INTEGER DEFAULT 0,

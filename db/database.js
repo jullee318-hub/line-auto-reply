@@ -191,9 +191,10 @@ function createOperator(username, passwordHash) {
 
 // --- broadcasts ---
 
-function createBroadcast(content, target, targetStage, scheduledAt, createdBy) {
-  run('INSERT INTO broadcasts (content, target, target_stage, scheduled_at, created_by) VALUES (?, ?, ?, ?, ?)',
-    [content, target, targetStage, scheduledAt, createdBy]);
+function createBroadcast(content, target, targetStage, contactIds, scheduledAt, createdBy) {
+  const idsJson = contactIds ? JSON.stringify(contactIds) : null;
+  run('INSERT INTO broadcasts (content, target, target_stage, contact_ids, scheduled_at, created_by) VALUES (?, ?, ?, ?, ?, ?)',
+    [content, target, targetStage, idsJson, scheduledAt, createdBy]);
   return getLastInsertRowid();
 }
 
@@ -216,7 +217,11 @@ function deleteBroadcast(id) {
   run('DELETE FROM broadcasts WHERE id = ? AND status = ?', [id, 'pending']);
 }
 
-function getContactsByTarget(target, targetStage) {
+function getContactsByTarget(target, targetStage, contactIds) {
+  if (target === 'pick' && contactIds && contactIds.length > 0) {
+    const placeholders = contactIds.map(() => '?').join(',');
+    return queryAll('SELECT * FROM contacts WHERE id IN (' + placeholders + ') AND is_blocked = 0', contactIds);
+  }
   if (target === 'stage' && targetStage) {
     return queryAll('SELECT * FROM contacts WHERE stage = ? AND is_blocked = 0', [targetStage]);
   }
