@@ -225,13 +225,22 @@ const contactId = window.location.pathname.split('/').pop();
 let currentDrafts = [];
 
 async function loadConversation() {
-  const [convRes, draftRes] = await Promise.all([
-    fetch(`/api/conversations/${contactId}`),
-    fetch('/api/drafts'),
-  ]);
-  const { contact, messages } = await convRes.json();
-  const allDrafts = await draftRes.json();
-  currentDrafts = allDrafts.filter(d => d.contact_id === parseInt(contactId));
+  let contact, messages;
+  try {
+    const [convRes, draftRes] = await Promise.all([
+      fetch(`/api/conversations/${contactId}`),
+      fetch('/api/drafts'),
+    ]);
+    const convData = await convRes.json();
+    contact = convData.contact;
+    messages = convData.messages;
+    const allDrafts = await draftRes.json();
+    currentDrafts = allDrafts.filter(d => d.contact_id === parseInt(contactId));
+    console.log('草稿數量:', allDrafts.length, '此對話草稿:', currentDrafts.length);
+  } catch (e) {
+    console.error('載入失敗:', e);
+    return;
+  }
 
   document.getElementById('contactName').textContent = contact.display_name || '未知用戶';
   const stageNames = { catch: '接住階段', warm: '養溫階段', convert: '轉化階段' };

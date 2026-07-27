@@ -73,12 +73,16 @@ async function processEvent(event) {
   const aiReply = await generateReply(messages, newStage, contact);
 
   const mode = db.getSetting('reply_mode') || 'semi-auto';
+  console.log('[Process] 目前模式:', mode);
 
   if (mode === 'auto') {
+    console.log('[Process] 全自動 → 直接回覆');
     await replyMessage(replyToken, aiReply);
     db.saveMessage(contact.id, 'outbound', 'ai', aiReply, null, null);
   } else {
+    console.log('[Process] 半自動 → 儲存草稿, inboundId:', inboundId);
     db.saveDraft(contact.id, inboundId, aiReply);
+    console.log('[Process] 草稿已儲存');
   }
 }
 

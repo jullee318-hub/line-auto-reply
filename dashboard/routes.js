@@ -114,6 +114,14 @@ function setupRoutes(app) {
     }
   });
 
+  app.get('/api/debug', requireAuth, (req, res) => {
+    const mode = db.getSetting('reply_mode');
+    const drafts = db.getPendingDrafts();
+    const contacts = db.listContacts();
+    console.log('[Debug] 模式:', mode, '待審核草稿:', drafts.length, '聯絡人:', contacts.length);
+    res.json({ mode, drafts_count: drafts.length, drafts, contacts_count: contacts.length });
+  });
+
   app.get('/api/settings', requireAuth, (req, res) => {
     res.json({
       reply_mode: db.getSetting('reply_mode') || 'semi-auto',
