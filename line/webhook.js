@@ -14,19 +14,25 @@ function validateSignature(body, signature) {
 }
 
 async function handleWebhook(req, res) {
+  console.log('[Webhook] 收到請求');
   const signature = req.headers['x-line-signature'];
   if (!signature || !validateSignature(req.rawBody, signature)) {
+    console.log('[Webhook] 簽章驗證失敗');
     return res.status(401).json({ error: 'Invalid signature' });
   }
+  console.log('[Webhook] 簽章驗證通過');
 
   res.status(200).json({ ok: true });
 
   const events = req.body.events || [];
+  console.log('[Webhook] 事件數量:', events.length);
   for (const event of events) {
+    console.log('[Webhook] 事件類型:', event.type, event.message?.type);
     try {
       await processEvent(event);
+      console.log('[Webhook] 事件處理完成');
     } catch (err) {
-      console.error('Error processing event:', err.message, err.stack);
+      console.error('[Webhook] 處理錯誤:', err.message, err.stack);
     }
   }
 }
@@ -38,15 +44,20 @@ async function processEvent(event) {
   const text = event.message.text;
   const messageId = event.message.id;
   const replyToken = event.replyToken;
+  console.log('[Process] 收到文字訊息:', text, '來自:', userId);
 
   let displayName = null;
   try {
     const { getProfile } = require('./reply');
     const profile = await getProfile(userId);
     displayName = profile.displayName;
-  } catch (e) {}
+    console.log('[Process] 取得用戶名稱:', displayName);
+  } catch (e) {
+    console.log('[Process] 取得用戶名稱失敗:', e.message);
+  }
 
   const contact = db.findOrCreateContact(userId, displayName);
+  console.log('[Process] 聯絡人:', contact ? contact.id : 'null');
   const inboundId = db.saveMessage(contact.id, 'inbound', 'user', text, messageId, null);
 
   const messageCount = db.getMessageCount(contact.id);
