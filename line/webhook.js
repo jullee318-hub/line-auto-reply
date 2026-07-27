@@ -26,7 +26,7 @@ async function handleWebhook(req, res) {
     try {
       await processEvent(event);
     } catch (err) {
-      console.error('Error processing event:', err);
+      console.error('Error processing event:', err.message, err.stack);
     }
   }
 }

@@ -18,9 +18,9 @@ async function init() {
     db = new SQL.Database();
   }
 
-  db.run('PRAGMA foreign_keys = ON');
+  db.exec('PRAGMA foreign_keys = ON;');
   const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8');
-  db.run(schema);
+  db.exec(schema);
   save();
   return db;
 }
@@ -87,8 +87,7 @@ function findOrCreateContact(lineUserId, displayName) {
   }
   run('INSERT INTO contacts (line_user_id, display_name, first_message_at, last_message_at) VALUES (?, ?, ?, ?)',
     [lineUserId, displayName, now, now]);
-  const id = getLastInsertRowid();
-  return queryOne('SELECT * FROM contacts WHERE id = ?', [id]);
+  return queryOne('SELECT * FROM contacts WHERE line_user_id = ?', [lineUserId]);
 }
 
 function getContact(contactId) {
