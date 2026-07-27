@@ -3,13 +3,20 @@ const session = require('express-session');
 const config = require('./config');
 const db = require('./db/database');
 const { handleWebhook } = require('./line/webhook');
-const { setupAuth } = require('./dashboard/auth');
+const { setupAuth, hashPassword } = require('./dashboard/auth');
 const { setupRoutes } = require('./dashboard/routes');
 
 async function start() {
   await db.init();
 
+  for (const op of config.operators) {
+    if (op.name && op.password) {
+      db.createOperator(op.name, hashPassword(op.password));
+    }
+  }
+
   const app = express();
+  app.set('trust proxy', 1);
 
   app.post('/webhook', express.raw({ type: '*/*' }), (req, res, next) => {
     req.rawBody = req.body.toString('utf-8');
