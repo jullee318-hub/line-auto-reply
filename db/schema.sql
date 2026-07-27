@@ -50,5 +50,21 @@ CREATE INDEX IF NOT EXISTS idx_messages_contact ON messages(contact_id, created_
 CREATE INDEX IF NOT EXISTS idx_drafts_status ON drafts(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_contacts_line_id ON contacts(line_user_id);
 
+CREATE TABLE IF NOT EXISTS broadcasts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content TEXT NOT NULL,
+  target TEXT NOT NULL DEFAULT 'all',
+  target_stage TEXT,
+  scheduled_at TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  sent_count INTEGER DEFAULT 0,
+  fail_count INTEGER DEFAULT 0,
+  created_by TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  sent_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_broadcasts_status ON broadcasts(status, scheduled_at);
+
 INSERT OR IGNORE INTO settings (key, value) VALUES ('reply_mode', 'semi-auto');
 INSERT OR IGNORE INTO settings (key, value) VALUES ('ai_model', 'claude-haiku-4-5-20251001');

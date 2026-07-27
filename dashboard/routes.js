@@ -151,6 +151,51 @@ function setupRoutes(app) {
     db.updateContactNotes(parseInt(req.params.contactId), notes || '');
     res.json({ ok: true });
   });
+
+  // --- broadcasts ---
+
+  app.get('/dashboard/broadcast', requireAuth, (req, res) => {
+    res.sendFile('broadcast.html', { root: path.join(__dirname, 'views') });
+  });
+
+  app.get('/api/broadcasts', requireAuth, (req, res) => {
+    res.json(db.listBroadcasts());
+  });
+
+  app.post('/api/broadcasts', requireAuth, (req, res) => {
+    try {
+      const { content, target, target_stage, scheduled_at } = req.body;
+      if (!content || !content.trim()) return res.status(400).json({ error: '請輸入訊息內容' });
+      if (!scheduled_at) return res.status(400).json({ error: '請選擇發送時間' });
+
+      const contacts = db.getContactsByTarget(target || 'all', target_stage);
+      if (contacts.length === 0) return res.status(400).json({ error: '沒有符合條件的聯絡人' });
+
+      const id = db.createBroadcast(
+        content.trim(),
+        target || 'all',
+        target_stage || null,
+        scheduled_at,
+        req.session.operator.username
+      );
+      console.log('[Broadcast] 建立排程 #' + id + '，預計發送給 ' + contacts.length + ' 人');
+      res.json({ ok: true, id, recipient_count: contacts.length });
+    } catch (err) {
+      console.error('[Broadcast] 建立失敗:', err.message);
+      res.status(500).json({ error: '建立失敗：' + err.message });
+    }
+  });
+
+  app.delete('/api/broadcasts/:id', requireAuth, (req, res) => {
+    db.deleteBroadcast(parseInt(req.params.id));
+    res.json({ ok: true });
+  });
+
+  app.get('/api/broadcast/preview', requireAuth, (req, res) => {
+    const { target, target_stage } = req.query;
+    const contacts = db.getContactsByTarget(target || 'all', target_stage);
+    res.json({ count: contacts.length, contacts: contacts.map(c => ({ id: c.id, display_name: c.display_name, stage: c.stage })) });
+  });
 }
 
 module.exports = { setupRoutes };

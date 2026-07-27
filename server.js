@@ -5,6 +5,7 @@ const db = require('./db/database');
 const { handleWebhook } = require('./line/webhook');
 const { setupAuth, hashPassword } = require('./dashboard/auth');
 const { setupRoutes } = require('./dashboard/routes');
+const { startScheduler } = require('./scheduler');
 
 async function start() {
   await db.init();
@@ -47,6 +48,7 @@ async function start() {
     console.log(`LINE 自動回覆系統已啟動 → http://localhost:${config.port}`);
     console.log(`Webhook URL: https://your-domain/webhook`);
     console.log(`管理後台: http://localhost:${config.port}/dashboard`);
+    startScheduler();
   });
 }
 

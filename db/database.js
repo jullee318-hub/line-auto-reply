@@ -189,6 +189,40 @@ function createOperator(username, passwordHash) {
   }
 }
 
+// --- broadcasts ---
+
+function createBroadcast(content, target, targetStage, scheduledAt, createdBy) {
+  run('INSERT INTO broadcasts (content, target, target_stage, scheduled_at, created_by) VALUES (?, ?, ?, ?, ?)',
+    [content, target, targetStage, scheduledAt, createdBy]);
+  return getLastInsertRowid();
+}
+
+function listBroadcasts() {
+  return queryAll('SELECT * FROM broadcasts ORDER BY created_at DESC');
+}
+
+function getPendingBroadcasts() {
+  const now = new Date().toISOString();
+  return queryAll('SELECT * FROM broadcasts WHERE status = ? AND scheduled_at <= ?', ['pending', now]);
+}
+
+function updateBroadcast(id, status, sentCount, failCount) {
+  const now = new Date().toISOString();
+  run('UPDATE broadcasts SET status = ?, sent_count = ?, fail_count = ?, sent_at = ? WHERE id = ?',
+    [status, sentCount, failCount, now, id]);
+}
+
+function deleteBroadcast(id) {
+  run('DELETE FROM broadcasts WHERE id = ? AND status = ?', [id, 'pending']);
+}
+
+function getContactsByTarget(target, targetStage) {
+  if (target === 'stage' && targetStage) {
+    return queryAll('SELECT * FROM contacts WHERE stage = ? AND is_blocked = 0', [targetStage]);
+  }
+  return queryAll('SELECT * FROM contacts WHERE is_blocked = 0');
+}
+
 module.exports = {
   init, getDb,
   findOrCreateContact, getContact, listContacts, updateContactStage, updateContactNotes,
@@ -196,4 +230,5 @@ module.exports = {
   saveDraft, getPendingDrafts, getDraft, updateDraft,
   getSetting, setSetting,
   getOperator, createOperator,
+  createBroadcast, listBroadcasts, getPendingBroadcasts, updateBroadcast, deleteBroadcast, getContactsByTarget,
 };
