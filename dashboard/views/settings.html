@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>設定 — 財富流動工作坊</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+.topbar {
+  background: #1B0933;
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.back-btn { color: #ccc; text-decoration: none; font-size: 20px; }
+.back-btn:hover { color: #fff; }
+.topbar h1 { font-size: 18px; font-weight: 600; }
+.container { max-width: 600px; margin: 0 auto; padding: 24px; }
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: #1B0933;
+}
+.card p {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 12px;
+}
+.toggle-group {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+}
+.toggle-btn {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #fff;
+  color: #888;
+  transition: all 0.2s;
+}
+.toggle-btn.active {
+  background: #7B5BBE;
+  color: #fff;
+}
+.toggle-btn:hover:not(.active) { background: #f0f0f0; }
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { color: #888; }
+.info-value { font-weight: 500; }
+.word-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.word-tag {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.word-ok { background: #e8f5e9; color: #2e7d32; }
+.word-no { background: #ffebee; color: #c62828; }
+.status-msg {
+  text-align: center;
+  font-size: 14px;
+  color: #27ae60;
+  margin-top: 12px;
+  min-height: 20px;
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="/dashboard/inbox" class="back-btn">←</a>
+  <h1>系統設定</h1>
+</div>
+<div class="container">
+  <div class="card">
+    <h2>回覆模式</h2>
+    <p>全自動：AI 直接回覆觀眾<br>半自動：AI 擬稿，你確認後才送出</p>
+    <div class="toggle-group">
+      <button class="toggle-btn" id="btnSemi" onclick="setMode('semi-auto')">半自動</button>
+      <button class="toggle-btn" id="btnAuto" onclick="setMode('auto')">全自動</button>
+    </div>
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>系統資訊</h2>
+    <div class="info-row">
+      <span class="info-label">AI 模型</span>
+      <span class="info-value" id="modelName">載入中</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">LINE 帳號</span>
+      <span class="info-value">財富流動工作坊 @183kzwyn</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">登入身分</span>
+      <span class="info-value" id="operatorName">載入中</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>語氣規範參考</h2>
+    <p>可以用的詞：</p>
+    <div class="word-list">
+      <span class="word-tag word-ok">金錢信念</span>
+      <span class="word-tag word-ok">校準</span>
+      <span class="word-tag word-ok">承接</span>
+      <span class="word-tag word-ok">流動</span>
+      <span class="word-tag word-ok">允許</span>
+      <span class="word-tag word-ok">值得</span>
+      <span class="word-tag word-ok">看見</span>
+      <span class="word-tag word-ok">覺察</span>
+    </div>
+    <p style="margin-top: 16px;">禁止用的詞：</p>
+    <div class="word-list">
+      <span class="word-tag word-no">財神</span>
+      <span class="word-tag word-no">加持</span>
+      <span class="word-tag word-no">保證豐盛</span>
+      <span class="word-tag word-no">財富自由</span>
+      <span class="word-tag word-no">磁鐵</span>
+      <span class="word-tag word-no">翻倍</span>
+      <span class="word-tag word-no">吸引力法則</span>
+    </div>
+  </div>
+</div>
+<script>
+async function load() {
+  const [settingsRes, meRes] = await Promise.all([
+    fetch('/api/settings'), fetch('/api/me')
+  ]);
+  const settings = await settingsRes.json();
+  const me = await meRes.json();
+
+  document.getElementById('modelName').textContent = settings.ai_model;
+  document.getElementById('operatorName').textContent = me.username;
+
+  document.getElementById('btnSemi').classList.toggle('active', settings.reply_mode === 'semi-auto');
+  document.getElementById('btnAuto').classList.toggle('active', settings.reply_mode === 'auto');
+}
+
+async function setMode(mode) {
+  await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reply_mode: mode }),
+  });
+  const msg = document.getElementById('statusMsg');
+  msg.textContent = mode === 'auto' ? '已切換為全自動模式' : '已切換為半自動模式';
+  setTimeout(() => msg.textContent = '', 3000);
+  load();
+}
+
+load();
+</script>
+</body>
+</html>
