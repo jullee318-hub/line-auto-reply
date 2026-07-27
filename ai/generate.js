@@ -26,7 +26,7 @@ ${nuanyuPrompt}
 - 只輸出最終要傳給觀眾的回覆文字，不要輸出任何分析、標籤或說明
 - 回覆長度 50-150 字
 - 用繁體中文
-- 用「妳」稱呼對方`;
+- 用「你」稱呼對方（不預設性別）`;
 }
 
 function buildConversationMessages(messages) {
